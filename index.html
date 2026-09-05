@@ -517,6 +517,21 @@ function closeSheet(){
   document.getElementById('veil').classList.remove('on');
 }
 
+function bindSearch(id, setter, after){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.oninput=e=>{
+    const pos=e.target.selectionStart, y=window.scrollY;
+    setter(e.target.value);
+    (after||renderMain)();
+    window.scrollTo(0,y);
+    const n=document.getElementById(id);
+    if(n){
+      n.focus();
+      try{ n.setSelectionRange(pos,pos); }catch(_){ }   // some browsers refuse this on type=search
+    }
+  };
+}
 function renderTally(){
   const isToday = state.tradeDate===todayKey();
   document.getElementById('evtBtn').textContent=(state.event||'Choose market')+' ▾';
@@ -668,8 +683,7 @@ function viewSell(){
   </div>`;
 }
 function bindSell(){
-  const q=document.getElementById('q');
-  if(q) q.oninput=e=>{ ui.q=e.target.value; const y=window.scrollY; renderMain(); window.scrollTo(0,y); document.getElementById('q').focus(); };
+  bindSearch('q', v=>{ ui.q=v; });
   document.querySelectorAll('[data-group]').forEach(b=>b.onclick=()=>{
     ui.group=(ui.group===b.dataset.group)?'all':b.dataset.group; renderMain(); });
   document.getElementById('showZero').onclick=()=>{ ui.showZero=!ui.showZero; renderMain(); };
@@ -1417,8 +1431,7 @@ function viewProducts(){
     </table></div>`).join('')}`;
 }
 function bindProducts(){
-  const pq=document.getElementById('pq');
-  if(pq) pq.oninput=e=>{ ui.pq=e.target.value; const y=window.scrollY; renderMain(); window.scrollTo(0,y); document.getElementById('pq').focus(); };
+  bindSearch('pq', v=>{ ui.pq=v; });
   document.querySelectorAll('[data-ps]').forEach(b=>b.onclick=()=>{ ui.pstatus=b.dataset.ps; renderMain(); });
   document.getElementById('prodImport').onclick=()=>pickFile(t=>importProducts(t));
   document.getElementById('prodExport').onclick=()=>download(`anornament-products-${todayKey()}.csv`, productsCSV(), 'text/csv');
@@ -1608,8 +1621,7 @@ function viewInventory(){
 }
 function bindInventory(){
   document.getElementById('invDate').onchange=e=>{ ui.invDate=e.target.value; renderMain(); };
-  const q=document.getElementById('q');
-  q.oninput=e=>{ ui.q=e.target.value; const y=window.scrollY; renderMain(); window.scrollTo(0,y); document.getElementById('q').focus(); };
+  bindSearch('q', v=>{ ui.q=v; });
   document.querySelectorAll('[data-group]').forEach(b=>b.onclick=()=>{ ui.group=(ui.group===b.dataset.group)?'all':b.dataset.group; renderMain(); });
   document.querySelectorAll('[data-loc]').forEach(b=>b.onclick=()=>{ ui.invLoc=ui.invLoc==='low'?'all':'low'; renderMain(); });
   document.getElementById('invAll').onclick=()=>{ ui.invAll=!ui.invAll; renderMain(); };
@@ -1638,7 +1650,7 @@ function openMakeSheet(){
     </div>
     <button class="big" id="mkSave">Add to stock</button>`);
   const draft={};
-  document.getElementById('mkQ').oninput=e=>{ ui.q=e.target.value; openMakeSheet(); };
+  bindSearch('mkQ', v=>{ ui.q=v; }, openMakeSheet);
   const paint=sku=>{ const el=document.querySelector(`[data-q="${sku}"]`); if(el) el.textContent=draft[sku]||0; };
   document.querySelectorAll('[data-mp]').forEach(b=>b.onclick=()=>{ const s=b.dataset.mp; draft[s]=(draft[s]||0)+1; paint(s); });
   document.querySelectorAll('[data-mm]').forEach(b=>b.onclick=()=>{ const s=b.dataset.mm; draft[s]=Math.max(0,(draft[s]||0)-1); paint(s); });
