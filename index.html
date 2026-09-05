@@ -70,6 +70,16 @@
   .prod.wood{border-left:4px solid var(--oak)} .prod.resin{border-left:4px solid var(--glaze)}
   .prod.dim{opacity:.5}
   .empty{padding:30px 10px;text-align:center;color:var(--ink-soft);font-size:14px}
+  .sec{display:flex;align-items:center;gap:8px;margin:14px 0 8px}
+  .sec b{font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--ink)}
+  .sec i{font-style:normal;font-size:11px;color:var(--ink-soft)}
+  .sec:after{content:"";flex:1;height:1px;background:var(--line)}
+  .sec:first-child{margin-top:4px}
+  .sub-sec{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;
+    margin:10px 0 6px;color:var(--ink-soft)}
+  .sub-sec.wood{color:var(--oak)} .sub-sec.resin{color:var(--glaze)}
+  tr.grouphead td{background:var(--paper);font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+    font-weight:700;color:var(--ink-soft);padding-top:12px}
 
   .bar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--card);border-top:1px solid var(--line);
     box-shadow:0 -6px 18px rgba(20,18,15,.07)}
@@ -351,7 +361,7 @@ let state = {
 };
 let ui = {tab:'sell', q:'', group:'all', showLines:false, range:'day', dash:'money',
           cmpA:'', cmpB:'', year:new Date().getFullYear(), invLoc:'all', invAll:false,
-          invDate:'', chan:'all', showZero:false, pstatus:'active', pq:''};
+          invDate:'', chan:'all', showZero:false, pstatus:'active', pq:'', invSort:'name'};
 let storageOK=true, storageKind='memory', toastTimer=null;
 
 const PACK_VERSION=2;
@@ -632,31 +642,41 @@ function sortSales(){
 }
 
 /* ---------------- MARKET: selling ---------------- */
+function lineKey(p){ return norm(p.name)+'|'+norm(p.group); }
+const matRank = c => c==='Resin' ? 1 : 0;          // wood first, then resin
+const byGroupName = (a,b) =>
+  (a.group||'').localeCompare(b.group||'','en') ||
+  (matRank(a.cat)-matRank(b.cat)) ||
+  (a.name||'').localeCompare(b.name||'','en') ||
+  (a.variant||'').localeCompare(b.variant||'','en');
+const sortedGroups = list => [...new Set(list.map(p=>p.group))].sort((a,b)=>a.localeCompare(b,'en'));
 function productLines(){                      // SKUs grouped back into products for the grid
   const map=new Map();
   state.products.filter(p=>p.active!==false).forEach(p=>{
-    const e=map.get(p.pid)||{pid:p.pid, name:p.name, group:p.group, cat:p.cat, optLabel:p.optLabel,
-                             skus:[], price:p.price, trolley:0, home:0, noStock:p.noStock};
+    const k=lineKey(p);
+    const e=map.get(k)||{key:k, pid:p.pid, name:p.name, group:p.group, cat:p.cat, optLabel:p.optLabel,
+                         skus:[], price:p.price, trolley:0, home:0, noStock:p.noStock};
     e.skus.push(p);
     e.price=Math.min(e.price,p.price);
     e.trolley+=trolleyQty(p.sku); e.home+=homeQty(p.sku);
-    map.set(p.pid,e);
+    map.set(k,e);
   });
-  return [...map.values()];
+  return [...map.values()].sort(byGroupName);
 }
 function viewSell(){
   const all=productLines();
   const loaded=all.filter(p=>p.trolley>0);             // the catch-all line doesn't count as "loaded"
   const backdating = state.tradeDate!==todayKey();     // typing up an old market: the trolley is irrelevant
   const base= (ui.showZero||backdating||!loaded.length) ? all : all.filter(p=>p.trolley>0||p.noStock);
-  const groups=[...new Set(base.map(p=>p.group))];
+  const groups=sortedGroups(base);
   const list=base.filter(p=>{
     if(ui.group!=='all' && p.group!==ui.group) return false;
     if(ui.q){ const hay=(p.name+' '+p.group+' '+p.skus.map(s=>s.variant).join(' ')).toLowerCase();
       if(!hay.includes(ui.q.toLowerCase())) return false; }
     return true;
   });
-  const sold={}; salesIn('day','Market').forEach(s=>s.lines.forEach(l=>{ sold[l.pid]=(sold[l.pid]||0)+l.qty; }));
+  const soldSku={}; salesIn('day','Market').forEach(s=>s.lines.forEach(l=>{ if(l.sku) soldSku[l.sku]=(soldSku[l.sku]||0)+l.qty; }));
+  const sold={}; base.forEach(p=>{ sold[p.key]=p.skus.reduce((n,x)=>n+(soldSku[x.sku]||0),0); });
   return `
   ${storageOK?'':'<div class="warn">Nothing can be saved on this device right now — records live only in this open window. Export a backup before closing it.</div>'}
   ${state.event?'':'<div class="warn">No market chosen. Tap the button top right so sales are filed in the right place.</div>'}
@@ -670,17 +690,24 @@ function viewSell(){
     ${groups.map(g=>`<button class="chip ${ui.group===g?'on':''}" data-group="${esc(g)}">${esc(g)}</button>`).join('')}
     <button class="chip ${(ui.showZero||backdating)?'on':''}" id="showZero">${(ui.showZero||backdating)?'Only what I brought':'Show everything'}</button>
   </div>
-  <div class="grid">
-    ${list.map(p=>{
-      const out=!p.noStock && p.trolley<=0;
-      return `<button class="prod ${p.cat.toLowerCase()} ${out?'dim':''}" data-pid="${p.pid}">
-        <span class="cat">${p.cat}</span>
-        ${p.noStock?'':`<span class="badge ${out?'out':''}">${out?'none':p.trolley+' left'}</span>`}
-        <span class="nm">${esc(p.name)}</span>
-        <span class="sub">${p.skus.length>1?p.skus.length+' options':'&nbsp;'}${sold[p.pid]?` · ${sold[p.pid]} sold today`:''}</span>
-        <span class="pr num">${p.price?money(p.price):'Set price'}</span>
-      </button>`;}).join('') || '<p class="empty">Nothing here. Load the trolley, or tap “Show everything”.</p>'}
-  </div>`;
+  ${list.length ? sortedGroups(list).map(g=>{
+    const inG=list.filter(p=>p.group===g);
+    const mats=[...new Set(inG.map(p=>p.cat))].sort((a,b)=>matRank(a)-matRank(b));
+    const split=mats.length>1;
+    return `<div class="sec"><b>${esc(g)}</b><i>${inG.length} ${inG.length===1?'piece':'pieces'}</i></div>
+      ${mats.map(m=>{
+        const inM=inG.filter(p=>p.cat===m);
+        return `${split?`<div class="sub-sec ${m.toLowerCase()}">${m}</div>`:''}
+        <div class="grid">${inM.map(p=>{
+          const out=!p.noStock && p.trolley<=0;
+          return `<button class="prod ${p.cat.toLowerCase()} ${out?'dim':''}" data-line="${esc(p.key)}">
+            <span class="cat">${p.cat}</span>
+            ${p.noStock?'':`<span class="badge ${out?'out':''}">${out?'none':p.trolley+' left'}</span>`}
+            <span class="nm">${esc(p.name)}</span>
+            <span class="sub">${p.skus.length>1?p.skus.length+' options':'&nbsp;'}${sold[p.key]?` · ${sold[p.key]} sold today`:''}</span>
+            <span class="pr num">${p.price?money(p.price):'Set price'}</span>
+          </button>`;}).join('')}</div>`;}).join('')}`;
+  }).join('') : '<p class="empty">Nothing here. Load the trolley, or tap “Show everything”.</p>'}`;
 }
 function bindSell(){
   bindSearch('q', v=>{ ui.q=v; });
@@ -689,10 +716,10 @@ function bindSell(){
   document.getElementById('showZero').onclick=()=>{ ui.showZero=!ui.showZero; renderMain(); };
   document.getElementById('trolleyBtn').onclick=openTrolleySheet;
   document.getElementById('wishBtn').onclick=openWishSheet;
-  document.querySelectorAll('[data-pid]').forEach(b=>b.onclick=()=>pickProduct(b.dataset.pid));
+  document.querySelectorAll('[data-line]').forEach(b=>b.onclick=()=>pickProduct(b.dataset.line));
 }
-function pickProduct(pid){
-  const line=productLines().find(p=>p.pid===pid); if(!line) return;
+function pickProduct(key){
+  const line=productLines().find(p=>p.key===key); if(!line) return;
   if(line.skus.length===1 && line.skus[0].price>0) return openItemSheet(line.skus[0]);
   openVariantPicker(line);
 }
@@ -779,7 +806,7 @@ function addLine(p, price, qty, listPrice){
 /* ---------------- trolley ---------------- */
 function openTrolleySheet(){
   const lines=state.products.filter(p=>!p.noStock && p.active!==false);
-  const shown=lines.filter(p=>trolleyQty(p.sku)>0 || homeQty(p.sku)>0 || ui.invAll);
+  const shown=lines.filter(p=>trolleyQty(p.sku)>0 || homeQty(p.sku)>0 || ui.invAll).sort(byGroupName);
   openSheet(`
     <h3>The trolley</h3>
     <div class="meta">What you loaded in the car, ${dayLabel(state.tradeDate)}. Moving a piece here takes it out of home stock; selling takes it out of the trolley.</div>
@@ -1352,7 +1379,8 @@ function importProducts(text){
         reorder: parseInt(pick(r,['Reorder level','Reorder','Min']),10) || (existing?existing.reorder:0),
         active: (pick(r,['Active'])||'yes').toLowerCase().startsWith('n') ? false : true,
         optLabel: existing?existing.optLabel:'Option',
-        pid: existing?existing.pid:('pid-'+norm(name||'x').slice(0,14)),
+        pid: existing ? existing.pid
+             : ((state.products.find(x=>norm(x.name)===norm(name))||{}).pid || 'pid-'+norm(name||'x').slice(0,18)),
         noStock: existing?existing.noStock:false, batch
       };
       const held = existing && (onHand(existing.sku,'all',null)!==0 ||
@@ -1393,7 +1421,8 @@ function viewProducts(){
     }
     return true;
   });
-  const groups=[...new Set(list.map(p=>p.group))];
+  list.sort(byGroupName);
+  const groups=sortedGroups(list);
   return `
   <div class="warn">Edit anything here freely — sales already recorded keep what they were sold at, so history never shifts. Stock is tracked per line below (each colourway separately).</div>
   <div class="panel"><h4>Master data</h4>
@@ -1573,8 +1602,9 @@ function viewInventory(){
   if(ui.q) rows=rows.filter(r=>(fullName(r.p)+' '+r.p.sku).toLowerCase().includes(ui.q.toLowerCase()));
   if(ui.invLoc==='low') rows=rows.filter(r=>r.low);
   else if(!ui.invAll) rows=rows.filter(r=>r.total!==0);
+  rows.sort(ui.invSort==='low' ? (a,b)=>(a.total-b.total)||byGroupName(a.p,b.p) : (a,b)=>byGroupName(a.p,b.p));
   const val=stockValue(d,'all');
-  const groups=[...new Set(state.products.filter(p=>!p.noStock).map(p=>p.group))];
+  const groups=sortedGroups(state.products.filter(p=>!p.noStock));
   const lowCount=stockRows().filter(r=>r.low).length;
   const recent=state.counts.slice(0,4);
   return `
@@ -1598,12 +1628,15 @@ function viewInventory(){
   <div class="chips">
     <button class="chip ${ui.invLoc==='low'?'on':''}" data-loc="low">Low stock${lowCount?' · '+lowCount:''}</button>
     <button class="chip ${ui.invAll?'on':''}" id="invAll">${ui.invAll?'Hide empty lines':'Show every line'}</button>
+    <button class="chip ${ui.invSort==='low'?'on':''}" id="invSort">${ui.invSort==='low'?'Lowest stock first':'A to Z'}</button>
     ${groups.map(g=>`<button class="chip ${ui.group===g?'on':''}" data-group="${esc(g)}">${esc(g)}</button>`).join('')}
   </div>
   <div class="panel">
     <table>
       <tr><th>Line</th><th class="n">Home</th><th class="n">Trolley</th><th class="n">Total</th><th class="n">Cover</th></tr>
-      ${rows.length?rows.map(r=>`<tr class="${r.low?'low':''}">
+      ${rows.length?rows.map((r,i)=>`${(i===0||rows[i-1].p.group!==r.p.group||rows[i-1].p.cat!==r.p.cat)&&ui.invSort!=='low'
+          ?`<tr class="grouphead"><td colspan="5">${esc(r.p.group)} · ${r.p.cat}</td></tr>`:''}
+        <tr class="${r.low?'low':''}">
         <td><b style="font-size:13px">${esc(r.p.name)}${r.p.variant?' — '+esc(r.p.variant):''}</b>
           <div style="font-size:11.5px;color:var(--ink-soft)">${r.p.sku}${r.total<0?' · <b class="danger">negative — needs a count</b>':''}</div></td>
         <td class="n num">${r.home}</td><td class="n num">${r.trolley}</td>
@@ -1625,6 +1658,7 @@ function bindInventory(){
   document.querySelectorAll('[data-group]').forEach(b=>b.onclick=()=>{ ui.group=(ui.group===b.dataset.group)?'all':b.dataset.group; renderMain(); });
   document.querySelectorAll('[data-loc]').forEach(b=>b.onclick=()=>{ ui.invLoc=ui.invLoc==='low'?'all':'low'; renderMain(); });
   document.getElementById('invAll').onclick=()=>{ ui.invAll=!ui.invAll; renderMain(); };
+  document.getElementById('invSort').onclick=()=>{ ui.invSort=ui.invSort==='low'?'name':'low'; renderMain(); };
   document.getElementById('countBtn').onclick=()=>openCountSheet();
   document.getElementById('makeBtn').onclick=openMakeSheet;
   document.getElementById('stDown').onclick=()=>{
@@ -1637,7 +1671,7 @@ function bindInventory(){
 }
 function openMakeSheet(){
   const d=invDate();
-  const list=state.products.filter(p=>!p.noStock && (ui.q?(fullName(p)+p.sku).toLowerCase().includes(ui.q.toLowerCase()):true));
+  const list=state.products.filter(p=>!p.noStock && (ui.q?(fullName(p)+p.sku).toLowerCase().includes(ui.q.toLowerCase()):true)).sort(byGroupName);
   openSheet(`
     <h3>Add stock made</h3>
     <div class="meta">New pieces finished, dated ${dayLabel(d)}. They go into home stock.</div>
@@ -1664,7 +1698,7 @@ function openMakeSheet(){
 }
 function openCountSheet(scope){
   const d=invDate();
-  const groups=[...new Set(state.products.filter(p=>!p.noStock).map(p=>p.group))];
+  const groups=sortedGroups(state.products.filter(p=>!p.noStock));
   if(!scope){
     openSheet(`
       <h3>Cycle count</h3>
@@ -1676,7 +1710,7 @@ function openCountSheet(scope){
     document.querySelectorAll('[data-scope]').forEach(b=>b.onclick=()=>openCountSheet(b.dataset.scope));
     return;
   }
-  const lines=state.products.filter(p=>!p.noStock && (scope==='__all'||p.group===scope));
+  const lines=state.products.filter(p=>!p.noStock && (scope==='__all'||p.group===scope)).sort(byGroupName);
   openSheet(`
     <h3>Counting ${scope==='__all'?'everything':esc(scope)}</h3>
     <div class="meta">Count home stock and trolley separately. Blank means "not counted" and is left alone.</div>
