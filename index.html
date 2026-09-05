@@ -221,92 +221,120 @@
    ============================================================ */
 const APP_VERSION = 4;
 
-/* ---------- base catalogue: one entry per product, variants listed ---------- */
-const BASE = [
-  {pid:'fig-pocket', code:'POCK', name:'Pocket Companion', group:'Wood Figurines', cat:'Wood', price:10, web:10, opts:[]},
-  {pid:'fig-merry-barker', code:'MBAR', name:'The Merry Barker', group:'Wood Figurines', cat:'Wood', price:22, web:22, optLabel:'Coat colour', opts:['Red','Black and Tan']},
-  {pid:'fig-little-sniffer', code:'LSNI', name:'The Little Sniffer', group:'Wood Figurines', cat:'Wood', price:22, web:22, opts:[]},
-  {pid:'fig-garrulous', code:'GARR', name:'The Garrulous Observer', group:'Wood Figurines', cat:'Wood', price:18, web:18, opts:[]},
-  {pid:'fig-cozy-cat', code:'COZY', name:'The Cozy Cat', group:'Wood Figurines', cat:'Wood', price:22, web:22, opts:[]},
-  {pid:'fig-merryweather', code:'MWEA', name:'Merryweather Pair', group:'Wood Figurines', cat:'Wood', price:22, web:22, opts:[]},
-  {pid:'fig-golden-friend', code:'GOLD', name:'The Golden Friend', group:'Wood Figurines', cat:'Wood', price:25, web:25, opts:[]},
-  {pid:'fig-little-guardian', code:'LGUA', name:'The Little Guardian', group:'Wood Figurines', cat:'Wood', price:22, web:22, opts:[]},
-  {pid:'fig-little-scholar', code:'LSCH', name:'The Little Scholar', group:'Wood Figurines', cat:'Wood', price:22, web:22, opts:[]},
-  {pid:'fig-quiet-feast', code:'QFEA', name:'The Quiet Feast', group:'Wood Figurines', cat:'Wood', price:18, web:18, opts:[]},
-  {pid:'fig-quiet-protector', code:'QPRO', name:'The Quiet Protector', group:'Wood Figurines', cat:'Wood', price:22, web:22, opts:[]},
-  {pid:'fig-spotted-friend', code:'SPOT', name:'The Spotted Friend', group:'Wood Figurines', cat:'Wood', price:22, web:22, opts:[]},
-  {pid:'fig-woodland-scout', code:'WSCO', name:'The Woodland Scout', group:'Wood Figurines', cat:'Wood', price:22, web:22, opts:[]},
-  {pid:'set-snuggle-pigs', code:'PIGS', name:'The Snuggle Pigs — Family Set (5 pieces)', group:'Wood Figurines', cat:'Wood', price:40, web:40, opts:[]},
-  {pid:'set-universe', code:'UNIV', name:'The Universe According to Them', group:'Wood Figurines', cat:'Wood', price:30, web:30, opts:[]},
-  {pid:'orn-merry-barker', code:'OMBA', name:'The Merry Barker — Ornament + name tag', group:'Wood Figurines', cat:'Wood', price:25, web:25, optLabel:'Coat colour', opts:['Red','Black and Tan']},
-  {pid:'orn-little-sniffer', code:'OLSN', name:'The Little Sniffer — Ornament + name tag', group:'Wood Figurines', cat:'Wood', price:25, web:25, opts:[]},
-  {pid:'orn-garrulous', code:'OGAR', name:'The Garrulous Observer — Ornament + name tag', group:'Wood Figurines', cat:'Wood', price:24, web:24, opts:[]},
-  {pid:'orn-little-guardian', code:'OLGU', name:'The Little Guardian — Ornament + name tag', group:'Wood Figurines', cat:'Wood', price:25, web:25, opts:[]},
-  {pid:'orn-little-scholar', code:'OLSC', name:'The Little Scholar — Ornament + name tag', group:'Wood Figurines', cat:'Wood', price:25, web:25, opts:[]},
-  {pid:'orn-quiet-feast', code:'OQFE', name:'The Quiet Feast — Ornament + name tag', group:'Wood Figurines', cat:'Wood', price:24, web:24, opts:[]},
-  {pid:'orn-quiet-protector', code:'OQPR', name:'The Quiet Protector — Ornament + name tag', group:'Wood Figurines', cat:'Wood', price:25, web:25, opts:[]},
-  {pid:'orn-spotted-friend', code:'OSPO', name:'The Spotted Friend — Ornament + name tag', group:'Wood Figurines', cat:'Wood', price:25, web:25, opts:[]},
-  {pid:'orn-woodland-scout', code:'OWSC', name:'The Woodland Scout — Ornament + name tag', group:'Wood Figurines', cat:'Wood', price:25, web:25, opts:[]},
-
-  {pid:'res-jingle-fig', code:'JING', name:'Jingle Along Resin Figure', group:'Resin Figurines', cat:'Resin', price:5, web:6.5, optLabel:'Type',
-   opts:['Black and White','Salt and Pepper','Apricot','Cafe au Lait','Solid White']},
-  {pid:'res-paws-fig', code:'PAWS', name:'Paws on Parade Resin Figure', group:'Resin Figurines', cat:'Resin', price:5, web:6.5, optLabel:'Type',
-   opts:['Brindle Pied','Red Coat','Clear Sable','Jet Black','Silver Eyebrown','Dudley']},
-  {pid:'res-tail-fig', code:'TAIL', name:'Tail Held High Resin Figure', group:'Resin Figurines', cat:'Resin', price:5, web:6.5, optLabel:'Type',
-   opts:['Creamy Tabby','Midnight','Creamsicle','Mask and Mantle','Ginger-and-White Tabby','Chocolate Point']},
-  {pid:'res-cloud-fig', code:'CLOU', name:'The Cloud Rider Resin Figure', group:'Resin Figurines', cat:'Resin', price:5, web:6.5, optLabel:'Type',
-   opts:['Capybara','Moggie','Golden','Shadow','Bunny']},
-  {pid:'res-jingle-orn', code:'OJIN', name:'Jingle Along — Resin Ornament + name tag', group:'Resin Figurines', cat:'Resin', price:17.5, web:17.5, optLabel:'Type',
-   opts:['Black and White','Salt and Pepper','Apricot','Cafe au Lait','Solid White']},
-  {pid:'res-paws-orn', code:'OPAW', name:'Paws on Parade — Resin Ornament + name tag', group:'Resin Figurines', cat:'Resin', price:17.5, web:17.5, optLabel:'Type',
-   opts:['Brindle Pied','Red Coat','Clear Sable','Jet Black','Silver Eyebrown','Dudley']},
-  {pid:'res-tail-orn', code:'OTAI', name:'Tail Held High — Resin Ornament + name tag', group:'Resin Figurines', cat:'Resin', price:17.5, web:17.5, optLabel:'Type',
-   opts:['Creamy Tabby','Midnight','Creamsicle','Mask and Mantle','Ginger-and-White Tabby','Chocolate Point']},
-  {pid:'res-cloud-orn', code:'OCLO', name:'The Cloud Rider — Resin Ornament + name tag', group:'Resin Figurines', cat:'Resin', price:17.5, web:17.5, optLabel:'Type',
-   opts:['Capybara','Moggie','Golden','Shadow','Bunny']},
-
-  {pid:'charm-cat-bag', code:'BCHA', name:'Bag Charm — Customised Portrait Cat', group:'Custom', cat:'Wood', price:20, web:20, opts:[]},
-  {pid:'other-custom', code:'CUST', name:'Other / custom order', group:'Custom', cat:'Wood', price:0, web:0, opts:[], noStock:true},
-
-  {pid:'home-hare-spoon', code:'HARE', name:'The Meadow Wooden Spoon — Open Field Hare', group:'Collectible home', cat:'Wood', price:24, web:24, optLabel:'Colour',
-   opts:['Aurora','Scarlet Sky','Sky Blue']},
-  {pid:'home-ladybird-coaster', code:'LADY', name:'The Meadow Wooden Coaster — The Impish Ladybird', group:'Collectible home', cat:'Wood', price:6, web:6, optLabel:'Ladybird',
-   opts:['Seven-Spot','Ten-Spot','Twenty-Two Spot']},
-  {pid:'home-honey-protector', code:'HONE', name:'Honey Protector', group:'Collectible home', cat:'Wood', price:20, web:20, opts:[]},
-
-  {pid:'br-corgi', code:'BCOR', name:'Close to Your Heart — Corgi', group:'Brooches', cat:'Wood', price:18, web:18, opts:[]},
-  {pid:'br-french-pitbull', code:'BFPB', name:'Close to Your Heart — French Pitbull', group:'Brooches', cat:'Wood', price:18, web:18, opts:[]},
-  {pid:'br-german-shepherd', code:'BGSH', name:'Close to Your Heart — German Shepherd', group:'Brooches', cat:'Wood', price:18, web:18, opts:[]},
-  {pid:'br-golden-retriever', code:'BGRE', name:'Close to Your Heart — Golden Retriever', group:'Brooches', cat:'Wood', price:18, web:18, opts:[]},
-  {pid:'br-labrador', code:'BLAB', name:'Close to Your Heart — Labrador Retriever', group:'Brooches', cat:'Wood', price:18, web:18, opts:[]},
-  {pid:'br-pug', code:'BPUG', name:'Close to Your Heart — Pug', group:'Brooches', cat:'Wood', price:18, web:18, opts:[]},
-  {pid:'br-spaniel', code:'BSPA', name:'Close to Your Heart — Spaniel', group:'Brooches', cat:'Wood', price:18, web:18, opts:[]},
-  {pid:'br-terrier', code:'BTER', name:'Close to Your Heart — Terrier', group:'Brooches', cat:'Wood', price:18, web:18, opts:[]},
-  {pid:'br-portrait-custom', code:'BPOR', name:'A Portrait in Their Colours — Custom brooch', group:'Brooches', cat:'Wood', price:25, web:25, opts:[]}
+/* ---------- catalogue: your product list, one line per variant ---------- */
+const SEED = [
+  // The Merry Barker
+  {sku:"MBARRED", pid:"pid-themerrybarker", name:"The Merry Barker", variant:"Red", group:"Figurines", cat:"Wood", price:22, web:22, cost:0, reorder:0, optLabel:"Colour", active:true},
+  {sku:"MBARBT", pid:"pid-themerrybarker", name:"The Merry Barker", variant:"Black and Tan", group:"Figurines", cat:"Wood", price:22, web:22, cost:0, reorder:0, optLabel:"Colour", active:true},
+  // The Little Sniffer
+  {sku:"LSNI", pid:"pid-thelittlesniffer", name:"The Little Sniffer", variant:"", group:"Figurines", cat:"Wood", price:22, web:22, cost:0, reorder:0, optLabel:"Option", active:true},
+  // The Garrulous Observer
+  {sku:"GARR", pid:"pid-thegarrulousobserv", name:"The Garrulous Observer", variant:"", group:"Figurines", cat:"Wood", price:18, web:18, cost:0, reorder:0, optLabel:"Option", active:true},
+  // The Golden Friend
+  {sku:"GOLD", pid:"pid-thegoldenfriend", name:"The Golden Friend", variant:"", group:"Figurines", cat:"Wood", price:25, web:25, cost:0, reorder:0, optLabel:"Option", active:true},
+  // The Little Guardian
+  {sku:"LGUA", pid:"pid-thelittleguardian", name:"The Little Guardian", variant:"", group:"Figurines", cat:"Wood", price:22, web:22, cost:0, reorder:0, optLabel:"Option", active:true},
+  // The Quiet Protector
+  {sku:"QPRO", pid:"pid-thequietprotector", name:"The Quiet Protector", variant:"", group:"Figurines", cat:"Wood", price:22, web:22, cost:0, reorder:0, optLabel:"Option", active:true},
+  // The Spotted Friend
+  {sku:"SPOT", pid:"pid-thespottedfriend", name:"The Spotted Friend", variant:"", group:"Figurines", cat:"Wood", price:22, web:22, cost:0, reorder:0, optLabel:"Option", active:true},
+  // The Woodland Scout
+  {sku:"WSCO", pid:"pid-thewoodlandscout", name:"The Woodland Scout", variant:"", group:"Figurines", cat:"Wood", price:22, web:22, cost:0, reorder:0, optLabel:"Option", active:true},
+  // The Snuggle Pigs - Family Set (5 pieces)
+  {sku:"PIGS", pid:"pid-thesnugglepigsfami", name:"The Snuggle Pigs - Family Set (5 pieces)", variant:"", group:"Figurines", cat:"Wood", price:40, web:40, cost:0, reorder:0, optLabel:"Option", active:true},
+  // Bag Charm Customised Portrait Cat
+  {sku:"BCHA", pid:"pid-bagcharmcustomised", name:"Bag Charm Customised Portrait Cat", variant:"", group:"Custom", cat:"Wood", price:20, web:20, cost:0, reorder:0, optLabel:"Option", active:true},
+  // The Meadow Wooden Drizzler - The Honey Keeper
+  {sku:"HONE", pid:"pid-themeadowwoodendri", name:"The Meadow Wooden Drizzler - The Honey Keeper", variant:"", group:"Collectible home", cat:"Wood", price:18, web:18, cost:0, reorder:0, optLabel:"Option", active:true},
+  // Close to Your Heart - Corgi
+  {sku:"BCOR", pid:"pid-closetoyourheartco", name:"Close to Your Heart - Corgi", variant:"", group:"Brooches", cat:"Resin", price:12, web:12, cost:0, reorder:0, optLabel:"Option", active:true},
+  // Close to Your Heart - French Pitbull
+  {sku:"BFPB", pid:"pid-closetoyourheartfr", name:"Close to Your Heart - French Pitbull", variant:"", group:"Brooches", cat:"Resin", price:12, web:12, cost:0, reorder:0, optLabel:"Option", active:true},
+  // Close to Your Heart - German Shepherd
+  {sku:"BGSH", pid:"pid-closetoyourheartge", name:"Close to Your Heart - German Shepherd", variant:"", group:"Brooches", cat:"Resin", price:12, web:12, cost:0, reorder:0, optLabel:"Option", active:true},
+  // Close to Your Heart - Golden Retriever
+  {sku:"BGRE", pid:"pid-closetoyourheartgo", name:"Close to Your Heart - Golden Retriever", variant:"", group:"Brooches", cat:"Resin", price:12, web:12, cost:0, reorder:0, optLabel:"Option", active:true},
+  // Close to Your Heart - Labrador Retriever
+  {sku:"BLAB", pid:"pid-closetoyourheartla", name:"Close to Your Heart - Labrador Retriever", variant:"", group:"Brooches", cat:"Resin", price:12, web:12, cost:0, reorder:0, optLabel:"Option", active:true},
+  // Close to Your Heart - Pug
+  {sku:"BPUG", pid:"pid-closetoyourheartpu", name:"Close to Your Heart - Pug", variant:"", group:"Brooches", cat:"Resin", price:12, web:12, cost:0, reorder:0, optLabel:"Option", active:true},
+  // Close to Your Heart - Cocker Spaniel
+  {sku:"BSPA", pid:"pid-closetoyourheartco", name:"Close to Your Heart - Cocker Spaniel", variant:"", group:"Brooches", cat:"Resin", price:12, web:12, cost:0, reorder:0, optLabel:"Option", active:true},
+  // Close to Your Heart - Bull Terrier
+  {sku:"BTER", pid:"pid-closetoyourheartbu", name:"Close to Your Heart - Bull Terrier", variant:"", group:"Brooches", cat:"Resin", price:12, web:12, cost:0, reorder:0, optLabel:"Option", active:true},
+  // A Portrait in Their Colours - Custom brooch
+  {sku:"BPOR", pid:"pid-aportraitintheirco", name:"A Portrait in Their Colours - Custom brooch", variant:"", group:"Custom", cat:"Resin", price:20, web:20, cost:0, reorder:0, optLabel:"Option", active:true},
+  // Pocket Companion - Ginuea pigs
+  {sku:"POCKGP3C", pid:"pid-pocketcompaniongin", name:"Pocket Companion - Ginuea pigs", variant:"Tricolor", group:"Figurines", cat:"Wood", price:10, web:10, cost:0, reorder:0, optLabel:"Option", active:true},
+  {sku:"POCKGPGY", pid:"pid-pocketcompaniongin", name:"Pocket Companion - Ginuea pigs", variant:"Grey", group:"Figurines", cat:"Wood", price:10, web:10, cost:0, reorder:0, optLabel:"Option", active:true},
+  // The Cozy Cat
+  {sku:"COZYGS", pid:"pid-thecozycat", name:"The Cozy Cat", variant:"Green Scarf", group:"Figurines", cat:"Wood", price:22, web:22, cost:0, reorder:0, optLabel:"Option", active:true},
+  {sku:"COZYTH", pid:"pid-thecozycat", name:"The Cozy Cat", variant:"Trapper Hat", group:"Figurines", cat:"Wood", price:22, web:22, cost:0, reorder:0, optLabel:"Option", active:true},
+  // Merryweather Pair
+  {sku:"MWEAB", pid:"pid-merryweatherpair", name:"Merryweather Pair", variant:"Berry", group:"Figurines", cat:"Wood", price:22, web:22, cost:0, reorder:0, optLabel:"Colour", active:true},
+  {sku:"MWEAM", pid:"pid-merryweatherpair", name:"Merryweather Pair", variant:"Moss", group:"Figurines", cat:"Wood", price:22, web:22, cost:0, reorder:0, optLabel:"Colour", active:true},
+  // The Little Scholar
+  {sku:"LSCHBE", pid:"pid-thelittlescholar", name:"The Little Scholar", variant:"Blue", group:"Figurines", cat:"Wood", price:22, web:22, cost:0, reorder:0, optLabel:"Colour", active:true},
+  {sku:"LSCHWE", pid:"pid-thelittlescholar", name:"The Little Scholar", variant:"White", group:"Figurines", cat:"Wood", price:22, web:22, cost:0, reorder:0, optLabel:"Colour", active:true},
+  {sku:"LSCHBN", pid:"pid-thelittlescholar", name:"The Little Scholar", variant:"Brown", group:"Figurines", cat:"Wood", price:22, web:22, cost:0, reorder:0, optLabel:"Colour", active:true},
+  // The Quiet Feast
+  {sku:"QFEATO", pid:"pid-thequietfeast", name:"The Quiet Feast", variant:"Tuxedo", group:"Figurines", cat:"Wood", price:18, web:18, cost:0, reorder:0, optLabel:"Option", active:true},
+  {sku:"QFEAST", pid:"pid-thequietfeast", name:"The Quiet Feast", variant:"Smokey Tabby", group:"Figurines", cat:"Wood", price:18, web:18, cost:0, reorder:0, optLabel:"Option", active:true},
+  {sku:"QFEAME", pid:"pid-thequietfeast", name:"The Quiet Feast", variant:"Marmalade", group:"Figurines", cat:"Wood", price:18, web:18, cost:0, reorder:0, optLabel:"Option", active:true},
+  {sku:"QFEAGR", pid:"pid-thequietfeast", name:"The Quiet Feast", variant:"Ginger", group:"Figurines", cat:"Wood", price:18, web:18, cost:0, reorder:0, optLabel:"Option", active:true},
+  {sku:"QFEAMT", pid:"pid-thequietfeast", name:"The Quiet Feast", variant:"Muddy Tabby", group:"Figurines", cat:"Wood", price:18, web:18, cost:0, reorder:0, optLabel:"Option", active:true},
+  {sku:"QFEACO", pid:"pid-thequietfeast", name:"The Quiet Feast", variant:"Calico", group:"Figurines", cat:"Wood", price:18, web:18, cost:0, reorder:0, optLabel:"Option", active:true},
+  // The Universe According to Them
+  {sku:"UNIVGR", pid:"pid-theuniverseaccordi", name:"The Universe According to Them", variant:"Ginger", group:"Figurines", cat:"Wood", price:30, web:30, cost:0, reorder:0, optLabel:"Option", active:true},
+  {sku:"UNIVTO", pid:"pid-theuniverseaccordi", name:"The Universe According to Them", variant:"Tuxedo", group:"Figurines", cat:"Wood", price:30, web:30, cost:0, reorder:0, optLabel:"Option", active:true},
+  {sku:"UNIVBY", pid:"pid-theuniverseaccordi", name:"The Universe According to Them", variant:"Blacky", group:"Figurines", cat:"Wood", price:30, web:30, cost:0, reorder:0, optLabel:"Option", active:true},
+  {sku:"UNIVCO", pid:"pid-theuniverseaccordi", name:"The Universe According to Them", variant:"Calico", group:"Figurines", cat:"Wood", price:30, web:30, cost:0, reorder:0, optLabel:"Option", active:true},
+  {sku:"UNIVTY", pid:"pid-theuniverseaccordi", name:"The Universe According to Them", variant:"Tabby", group:"Figurines", cat:"Wood", price:30, web:30, cost:0, reorder:0, optLabel:"Option", active:true},
+  // Jingle Along
+  {sku:"JINGBW", pid:"pid-jinglealong", name:"Jingle Along", variant:"Black and White", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Type", active:true},
+  {sku:"JINGSP", pid:"pid-jinglealong", name:"Jingle Along", variant:"Salt and Pepper", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Type", active:true},
+  {sku:"JINGAT", pid:"pid-jinglealong", name:"Jingle Along", variant:"Apricot", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Type", active:true},
+  {sku:"JINGCAL", pid:"pid-jinglealong", name:"Jingle Along", variant:"Cafe au Lait", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Type", active:true},
+  {sku:"JINGSW", pid:"pid-jinglealong", name:"Jingle Along", variant:"Solid White", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Type", active:true},
+  // Paws on Parade
+  {sku:"PAWSBP", pid:"pid-pawsonparade", name:"Paws on Parade", variant:"Brindle Pied", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Type", active:true},
+  {sku:"PAWSRC", pid:"pid-pawsonparade", name:"Paws on Parade", variant:"Red Coat", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Type", active:true},
+  {sku:"PAWSCS", pid:"pid-pawsonparade", name:"Paws on Parade", variant:"Clear Sable", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Type", active:true},
+  {sku:"PAWSJB", pid:"pid-pawsonparade", name:"Paws on Parade", variant:"Jet Black", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Type", active:true},
+  {sku:"PAWSSE", pid:"pid-pawsonparade", name:"Paws on Parade", variant:"Silver Eyebrown", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Type", active:true},
+  {sku:"PAWSDY", pid:"pid-pawsonparade", name:"Paws on Parade", variant:"Dudley", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Type", active:true},
+  // Tail Held High
+  {sku:"TAILCT", pid:"pid-tailheldhigh", name:"Tail Held High", variant:"Creamy Tabby", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Colour", active:true},
+  {sku:"TAILMT", pid:"pid-tailheldhigh", name:"Tail Held High", variant:"Midnight", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Colour", active:true},
+  {sku:"TAILCE", pid:"pid-tailheldhigh", name:"Tail Held High", variant:"Creamsicle", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Colour", active:true},
+  {sku:"TAILMM", pid:"pid-tailheldhigh", name:"Tail Held High", variant:"Mask and Mantle", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Colour", active:true},
+  {sku:"TAILGWT", pid:"pid-tailheldhigh", name:"Tail Held High", variant:"Ginger-and-White Tabby", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Colour", active:true},
+  {sku:"TAILCP", pid:"pid-tailheldhigh", name:"Tail Held High", variant:"Chocolate Point", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Colour", active:true},
+  {sku:"TAILWE", pid:"pid-tailheldhigh", name:"Tail Held High", variant:"White", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Colour", active:true},
+  {sku:"TAILCO", pid:"pid-tailheldhigh", name:"Tail Held High", variant:"Calico", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Colour", active:true},
+  {sku:"TAILTO", pid:"pid-tailheldhigh", name:"Tail Held High", variant:"Tuxedo", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Colour", active:true},
+  // The Cloud Rider
+  {sku:"CLOUCA", pid:"pid-thecloudrider", name:"The Cloud Rider", variant:"Capybara", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Type", active:true},
+  {sku:"CLOUME", pid:"pid-thecloudrider", name:"The Cloud Rider", variant:"Moggie", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Type", active:true},
+  {sku:"CLOUGN", pid:"pid-thecloudrider", name:"The Cloud Rider", variant:"Golden", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Type", active:true},
+  {sku:"CLOUSW", pid:"pid-thecloudrider", name:"The Cloud Rider", variant:"Shadow", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Type", active:true},
+  {sku:"CLOUBY", pid:"pid-thecloudrider", name:"The Cloud Rider", variant:"Bunny", group:"Figurines", cat:"Resin", price:5, web:6.5, cost:0, reorder:0, optLabel:"Type", active:true},
+  // Custom Wooden Cat Figurine
+  {sku:"CUSTWC", pid:"pid-customwoodencatfig", name:"Custom Wooden Cat Figurine", variant:"", group:"Custom", cat:"Wood", price:25, web:25, cost:0, reorder:0, optLabel:"Option", active:true},
+  // Custom Wooden Dog Figurine
+  {sku:"CUSTWD", pid:"pid-customwoodendogfig", name:"Custom Wooden Dog Figurine", variant:"", group:"Custom", cat:"Wood", price:40, web:40, cost:0, reorder:0, optLabel:"Option", active:true},
+  // The Meadow Wooden Spoon - Open Field Hare
+  {sku:"HAREAA", pid:"pid-themeadowwoodenspo", name:"The Meadow Wooden Spoon - Open Field Hare", variant:"Aurora", group:"Collectible home", cat:"Wood", price:24, web:24, cost:0, reorder:0, optLabel:"Option", active:true},
+  {sku:"HARESS", pid:"pid-themeadowwoodenspo", name:"The Meadow Wooden Spoon - Open Field Hare", variant:"Scarlet Sky", group:"Collectible home", cat:"Wood", price:24, web:24, cost:0, reorder:0, optLabel:"Option", active:true},
+  {sku:"HARESB", pid:"pid-themeadowwoodenspo", name:"The Meadow Wooden Spoon - Open Field Hare", variant:"Sky Blue", group:"Collectible home", cat:"Wood", price:24, web:24, cost:0, reorder:0, optLabel:"Option", active:true},
+  // The Meadow Wooden Coaster - The Impish Ladybird
+  {sku:"LADY7S", pid:"pid-themeadowwoodencoa", name:"The Meadow Wooden Coaster - The Impish Ladybird", variant:"Seven-Spot", group:"Collectible home", cat:"Wood", price:6, web:6, cost:0, reorder:0, optLabel:"Option", active:true},
+  {sku:"LADY10S", pid:"pid-themeadowwoodencoa", name:"The Meadow Wooden Coaster - The Impish Ladybird", variant:"Ten-Spot", group:"Collectible home", cat:"Wood", price:6, web:6, cost:0, reorder:0, optLabel:"Option", active:true},
+  {sku:"LADY22S", pid:"pid-themeadowwoodencoa", name:"The Meadow Wooden Coaster - The Impish Ladybird", variant:"Twenty-Two Spot", group:"Collectible home", cat:"Wood", price:6, web:6, cost:0, reorder:0, optLabel:"Option", active:true},
+  // catch-all for anything sold that isn't in the list — delete it in Products if you don't want it
+  {sku:"OTHER", pid:"pid-other", name:"Other / custom order", variant:"", group:"Custom", cat:"Wood", price:0, web:0, cost:0, reorder:0, optLabel:"Option", active:true, noStock:true}
 ];
-
-const STOP = ['and','the','a','of','au','on','in'];
-function variantToken(v){
-  const words=v.split(/[^A-Za-z0-9]+/).filter(w=>w && !STOP.includes(w.toLowerCase()));
-  if(!words.length) return 'STD';
-  if(words.length===1) return words[0].slice(0,5).toUpperCase();
-  return words.map(w=>w.slice(0,3)).join('').slice(0,7).toUpperCase();
-}
-function buildCatalogue(){
-  const out=[], used=new Set();
-  BASE.forEach(b=>{
-    const opts = (b.opts && b.opts.length) ? b.opts : [''];
-    opts.forEach(v=>{
-      let sku = b.code + (v?'-'+variantToken(v):'');
-      let n=2; while(used.has(sku)){ sku = b.code+'-'+variantToken(v)+n; n++; }
-      used.add(sku);
-      out.push({sku, pid:b.pid, name:b.name, variant:v, group:b.group, cat:b.cat,
-        price:b.price, web:b.web!=null?b.web:b.price, cost:0, reorder:0,
-        optLabel:b.optLabel||'Option', active:true, noStock:!!b.noStock});
-    });
-  });
-  return out;
-}
+const buildCatalogue = () => SEED.map(p=>({...p}));
 
 /* ---------- state ---------- */
 let state = {
@@ -323,7 +351,7 @@ let state = {
 };
 let ui = {tab:'sell', q:'', group:'all', showLines:false, range:'day', dash:'money',
           cmpA:'', cmpB:'', year:new Date().getFullYear(), invLoc:'all', invAll:false,
-          invDate:'', chan:'all', showZero:false};
+          invDate:'', chan:'all', showZero:false, pstatus:'active', pq:''};
 let storageOK=true, storageKind='memory', toastTimer=null;
 
 const PACK_VERSION=2;
@@ -452,7 +480,7 @@ function weeksCover(sku){
 }
 function isLow(p){
   const have=onHand(p.sku,'all',null);
-  if(p.noStock) return false;
+  if(p.noStock || p.active===false) return false;      // retired lines aren't worth making more of
   if(p.reorder>0) return have<=p.reorder;
   const c=weeksCover(p.sku);
   return c!==Infinity && c<3 && soldSince(p.sku,56)>0;
@@ -603,9 +631,9 @@ function productLines(){                      // SKUs grouped back into products
 }
 function viewSell(){
   const all=productLines();
-  const inTrolley=all.filter(p=>p.trolley>0 || p.noStock);
+  const loaded=all.filter(p=>p.trolley>0);             // the catch-all line doesn't count as "loaded"
   const backdating = state.tradeDate!==todayKey();     // typing up an old market: the trolley is irrelevant
-  const base= (ui.showZero||backdating) ? all : (inTrolley.length?inTrolley:all);
+  const base= (ui.showZero||backdating||!loaded.length) ? all : all.filter(p=>p.trolley>0||p.noStock);
   const groups=[...new Set(base.map(p=>p.group))];
   const list=base.filter(p=>{
     if(ui.group!=='all' && p.group!==ui.group) return false;
@@ -1207,6 +1235,12 @@ function matchSku(sku, name, variant){
   }
   return null;
 }
+function renameSku(oldSku, newSku){
+  if(!oldSku || !newSku || oldSku===newSku) return;
+  state.moves.forEach(m=>{ if(m.sku===oldSku) m.sku=newSku; });
+  state.sales.forEach(s=>s.lines.forEach(l=>{ if(l.sku===oldSku) l.sku=newSku; }));
+  _stockVer++;
+}
 function addBatch(kind, note, n){
   const b={id:uid(), kind, note, n, at:new Date().toISOString(), day:todayKey()};
   state.batches.unshift(b); return b.id;
@@ -1239,38 +1273,64 @@ function productsCSV(){
 function importProducts(text){
   const rows=toObjects(parseCSV(text));
   if(!rows.length) return toast('That file had no rows');
-  let added=0, updated=0, bad=0;
-  const prepared=[];
+  const prepared=[]; let bad=0, added=0, updated=0, renamed=0;
+  const claimed=new Set();
   rows.forEach(r=>{
     const sku=pick(r,['SKU','sku','Variant SKU']);
     const name=pick(r,['Name','Product','Title','Product name']);
     if(!sku && !name){ bad++; return; }
     const variant=pick(r,['Variant','Option','Option1 Value','Colour','Color','Type']);
-    const existing = sku ? state.products.find(p=>norm(p.sku)===norm(sku)) : matchSku('',name,variant);
-    prepared.push({r, sku, name, variant, existing});
-    if(existing) updated++; else added++;
+    let existing = sku ? state.products.find(p=>norm(p.sku)===norm(sku)) : null;
+    let rename=false;
+    if(!existing){                                   // no SKU match — is it the same piece under a new code?
+      const byName=matchSku('',name,variant);
+      if(byName && !claimed.has(byName.sku)){ existing=byName; rename=!!sku; }
+    }
+    if(existing) claimed.add(existing.sku);
+    if(existing){ updated++; if(sku && existing.sku!==sku.toUpperCase()) renamed++; } else added++;
+    prepared.push({r, sku, name, variant, existing, rename});
   });
+  const keep=new Set(prepared.filter(x=>x.existing).map(x=>x.existing.sku));
+  const orphans=state.products.filter(p=>!keep.has(p.sku));
+  const orphanHeld=orphans.filter(p=>onHand(p.sku,'all',null)!==0 || state.sales.some(s=>s.lines.some(l=>l.sku===p.sku)));
+  const orphanFree=orphans.filter(p=>!orphanHeld.includes(p));
+
   openSheet(`
     <h3>Products — check before importing</h3>
     <div class="meta">${rows.length} rows read${bad?` · ${bad} skipped (no SKU or name)`:''}</div>
     <div class="kpi">
       <div><span>New lines</span><strong class="num">${added}</strong></div>
-      <div><span>Updated</span><strong class="num">${updated}</strong></div>
+      <div><span>Updated</span><strong class="num">${updated}</strong><small>${renamed} getting a new SKU</small></div>
+      <div><span>Not in the file</span><strong class="num">${orphans.length}</strong><small>${orphanHeld.length} hold stock or history</small></div>
+      <div><span>Lines after</span><strong class="num">${state.products.length+added}</strong><small>if you update and add</small></div>
     </div>
+    ${renamed?`<div class="warn">${renamed} line(s) matched by name rather than SKU, so their code will change to the one in your file. Their stock and sales history moves across with them.</div>`:''}
     <div class="lbl">First few rows</div>
-    <table>${prepared.slice(0,6).map(x=>`<tr><td>${esc(x.sku||'—')}</td><td>${esc(x.name)}${x.variant?' — '+esc(x.variant):''}</td>
-      <td class="n">${x.existing?'update':'new'}</td></tr>`).join('')}</table>
-    <button class="big" id="ipGo">Import ${rows.length-bad} rows</button>
+    <table>${prepared.slice(0,6).map(x=>`<tr><td>${esc(x.name)}${x.variant?' — '+esc(x.variant):''}</td>
+      <td class="n">${esc(x.sku||'—')}</td>
+      <td class="n">${x.existing?(x.rename?'recode':'update'):'new'}</td></tr>`).join('')}</table>
+    ${prepared.filter(x=>(pick(x.r,['Active'])||'yes').toLowerCase().startsWith('n')).length?
+      `<div class="warn">${prepared.filter(x=>(pick(x.r,['Active'])||'yes').toLowerCase().startsWith('n')).length} row(s) marked <b>Active = no</b> will be deleted, unless they hold stock or have been sold — those are retired instead.</div>`:''}
+    <button class="big" id="ipGo">Update and add</button>
+    <button class="ghost danger" id="ipReplace">Replace the whole list</button>
+    <div style="font-size:12px;color:var(--ink-soft);margin-top:8px">
+      Replacing removes the ${orphanFree.length} line(s) missing from your file that have never been sold and hold no stock.
+      The other ${orphanHeld.length} are retired instead, so your history and stock figures stay whole.
+    </div>
     <button class="ghost" id="ipCancel">Cancel</button>`);
   document.getElementById('ipCancel').onclick=closeSheet;
-  document.getElementById('ipGo').onclick=()=>{
+  const run=replace=>{
     const batch=addBatch('products','Product master data', prepared.length);
-    prepared.forEach(({r,sku,name,variant,existing})=>{
+    const isNo = x => (pick(x.r,['Active'])||'yes').toLowerCase().startsWith('n');
+    const ordered = prepared.filter(x=>!isNo(x)).concat(prepared.filter(isNo));   // active rows first
+    const written = new Set();
+    ordered.forEach(({r,sku,name,variant,existing,rename})=>{
+      const catRaw=pick(r,['Category','Material']);
       const row={
-        sku: sku || (norm(name).slice(0,6).toUpperCase()+'-'+uid().slice(0,3)).toUpperCase(),
+        sku: (sku || (existing?existing.sku:(norm(name).slice(0,6).toUpperCase()+'-'+uid().slice(0,3)))).toUpperCase(),
         name: name || (existing?existing.name:'Untitled'),
-        variant: variant || (existing?existing.variant:''),
-        cat: (pick(r,['Category','Material'])||'').toLowerCase().startsWith('res')?'Resin':(pick(r,['Category','Material'])?'Wood':(existing?existing.cat:'Wood')),
+        variant: variant!==''?variant:(existing?existing.variant:''),
+        cat: catRaw ? (catRaw.toLowerCase().startsWith('res')?'Resin':'Wood') : (existing?existing.cat:'Wood'),
         group: pick(r,['Group','Type group','Collection','Product type']) || (existing?existing.group:'Wood Figurines'),
         price: parseFloat(pick(r,['Market price','Price','Market'])) || (existing?existing.price:0),
         web: parseFloat(pick(r,['Web price','Website price','Online price'])) || (existing?existing.web:0),
@@ -1281,24 +1341,61 @@ function importProducts(text){
         pid: existing?existing.pid:('pid-'+norm(name||'x').slice(0,14)),
         noStock: existing?existing.noStock:false, batch
       };
-      touch(row);
-      if(existing) Object.assign(existing,row);
+      const held = existing && (onHand(existing.sku,'all',null)!==0 ||
+                    state.sales.some(sl=>sl.lines.some(l=>l.sku===existing.sku)));
+      if(!row.active){
+        // a row marked "no" never overrides a line an active row in the same file has just written
+        if(existing && written.has(existing.sku)) return;
+        if(written.has(row.sku)) return;
+        if(!held){ if(existing) state.products=state.products.filter(x=>x.sku!==existing.sku); return; }
+      }
+      touch(row); written.add(row.sku);
+      if(existing){ if(existing.sku!==row.sku) renameSku(existing.sku, row.sku); Object.assign(existing,row); }
       else state.products.push(row);
     });
-    save(); closeSheet(); render(); toast(`${prepared.length} product lines imported`);
+    let retired=0, dropped=0;
+    if(replace){
+      orphanHeld.forEach(p=>{ if(p.active!==false){ p.active=false; touch(p); retired++; } });
+      const drop=new Set(orphanFree.map(p=>p.sku));
+      dropped=drop.size;
+      state.products=state.products.filter(p=>!drop.has(p.sku));
+    }
+    save(); closeSheet(); render();
+    toast(replace ? `List replaced · ${prepared.length} lines in, ${retired} retired, ${dropped} removed`
+                  : `${prepared.length} product lines imported`);
   };
+  document.getElementById('ipGo').onclick=()=>run(false);
+  document.getElementById('ipReplace').onclick=()=>run(true);
 }
 function viewProducts(){
-  const groups=[...new Set(state.products.map(p=>p.group))];
+  const total=state.products.length;
+  const retiredAll=state.products.filter(p=>p.active===false).length;
+  let list=state.products.filter(p=>{
+    if(ui.pstatus==='active' && p.active===false) return false;
+    if(ui.pstatus==='retired' && p.active!==false) return false;
+    if(ui.pq){
+      const hay=(p.name+' '+p.variant+' '+p.sku+' '+p.group).toLowerCase();
+      if(!hay.includes(ui.pq.toLowerCase())) return false;
+    }
+    return true;
+  });
+  const groups=[...new Set(list.map(p=>p.group))];
   return `
   <div class="warn">Edit anything here freely — sales already recorded keep what they were sold at, so history never shifts. Stock is tracked per line below (each colourway separately).</div>
   <div class="panel"><h4>Master data</h4>
     <button class="ghost" id="prodImport" style="margin-top:0">Upload products (CSV or Excel)</button>
     <button class="ghost" id="prodExport">Download current list as CSV</button>
     <button class="ghost" id="prodAdd">Add a line by hand</button>
+    <button class="ghost danger" id="freshBtn">Start fresh — clear everything on this device</button>
     <div style="font-size:12px;color:var(--ink-soft);margin-top:8px">
       Columns: ${PROD_COLS.join(', ')}. Matched on SKU — download the list first and edit that, and nothing can go astray.
     </div>
+  </div>
+  <div class="tools"><input type="search" id="pq" placeholder="Search a line, SKU or category…" value="${esc(ui.pq)}"></div>
+  <div class="chips">
+    <button class="chip ${ui.pstatus==='active'?'on':''}" data-ps="active">Selling · ${total-retiredAll}</button>
+    <button class="chip ${ui.pstatus==='retired'?'on':''}" data-ps="retired">Retired · ${retiredAll}</button>
+    <button class="chip ${ui.pstatus==='all'?'on':''}" data-ps="all">All · ${total}</button>
   </div>
   <div class="panel"><h4>Packaging</h4>
     <table>${state.packs.map(k=>`<tr><td><b>${esc(k.name)}</b>
@@ -1307,24 +1404,58 @@ function viewProducts(){
       <td class="n"><button class="opt" data-pked="${k.id}" style="padding:7px 11px">Edit</button></td></tr>`).join('')}</table>
     <button class="ghost" id="packAdd">Add a packaging option</button>
   </div>
-  ${groups.map(g=>`<div class="panel"><h4>${esc(g)} · ${state.products.filter(p=>p.group===g).length} lines</h4>
+  ${list.length?'':'<p class="empty">Nothing matches. Try the All chip, or clear the search.</p>'}
+  ${groups.map(g=>`<div class="panel"><h4>${esc(g)} · ${list.filter(p=>p.group===g).length} lines</h4>
     <table>
       <tr><th>Line</th><th class="n">Price</th><th class="n">Stock</th><th></th></tr>
-      ${state.products.filter(p=>p.group===g).map(p=>`<tr class="${isLow(p)?'low':''}">
+      ${list.filter(p=>p.group===g).map(p=>`<tr class="${isLow(p)?'low':''}" style="${p.active===false?'opacity:.6':''}">
         <td><b style="font-size:13px">${esc(p.name)}${p.variant?' — '+esc(p.variant):''}</b>
-          <div style="font-size:11.5px;color:var(--ink-soft)">${p.sku} · ${p.cat}${p.cost?' · cost '+money(p.cost):''}${p.active===false?' · not selling':''}</div></td>
+          <div style="font-size:11.5px;color:var(--ink-soft)">${p.sku} · ${p.cat}${p.cost?' · cost '+money(p.cost):''}${p.active===false?' · <b>retired</b>':''}</div></td>
         <td class="n num">${money(p.price)}${p.web!==p.price?`<div style="font-size:11px;color:var(--ink-soft)">web ${money(p.web)}</div>`:''}</td>
         <td class="n num">${p.noStock?'—':onHand(p.sku,'all',null)}</td>
         <td class="n"><button class="opt" data-ed="${p.sku}" style="padding:7px 11px">Edit</button></td></tr>`).join('')}
     </table></div>`).join('')}`;
 }
 function bindProducts(){
+  const pq=document.getElementById('pq');
+  if(pq) pq.oninput=e=>{ ui.pq=e.target.value; const y=window.scrollY; renderMain(); window.scrollTo(0,y); document.getElementById('pq').focus(); };
+  document.querySelectorAll('[data-ps]').forEach(b=>b.onclick=()=>{ ui.pstatus=b.dataset.ps; renderMain(); });
   document.getElementById('prodImport').onclick=()=>pickFile(t=>importProducts(t));
   document.getElementById('prodExport').onclick=()=>download(`anornament-products-${todayKey()}.csv`, productsCSV(), 'text/csv');
   document.getElementById('prodAdd').onclick=()=>editProduct(null);
+  document.getElementById('freshBtn').onclick=openFreshSheet;
   document.getElementById('packAdd').onclick=()=>openPackEdit(null);
   document.querySelectorAll('[data-pked]').forEach(b=>b.onclick=()=>openPackEdit(b.dataset.pked));
   document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>editProduct(b.dataset.ed));
+}
+function openFreshSheet(){
+  openSheet(`
+    <h3>Start fresh</h3>
+    <div class="meta">This wipes everything held on this device and puts the product list back to the ${SEED.length} lines built in.</div>
+    <div class="kpi">
+      <div><span>Sales</span><strong class="num">${state.sales.length}</strong><small>will be deleted</small></div>
+      <div><span>Stock movements</span><strong class="num">${state.moves.length}</strong><small>will be deleted</small></div>
+    </div>
+    <div class="warn">There is no undo. If there is anything you want to keep, download a backup first.</div>
+    <button class="ghost" id="frBackup">Download a backup first</button>
+    <button class="big danger" id="frGo" style="background:var(--alert)">Yes — clear it all</button>
+    <button class="ghost" id="frCancel">Cancel</button>`);
+  document.getElementById('frCancel').onclick=closeSheet;
+  document.getElementById('frBackup').onclick=()=>{
+    const out={v:APP_VERSION, savedAt:new Date().toISOString()}; KEEP.forEach(k=>out[k]=state[k]);
+    download(`anornament-backup-${todayKey()}.json`, JSON.stringify(out), 'application/json');
+  };
+  document.getElementById('frGo').onclick=()=>{
+    state.products=buildCatalogue();
+    state.sales=[]; state.moves=[]; state.counts=[]; state.batches=[];
+    state.wishes=[]; state.costs={}; state.markets=[]; state.event='';
+    state.sale=[]; state.saleMeta=blankMeta();
+    state.deleted={sales:[],moves:[],counts:[],batches:[]};
+    state.tradeDate=todayKey();
+    ui.group='all'; ui.pq=''; ui.pstatus='active';
+    _stockVer++; save(); closeSheet(); render();
+    toast(`Cleared · ${state.products.length} product lines ready`);
+  };
 }
 function editProduct(sku){
   const isNew=!sku;
@@ -1417,7 +1548,7 @@ function openPackEdit(id){
 function invDate(){ return ui.invDate || state.tradeDate; }
 function stockRows(){
   const d=invDate();
-  return state.products.filter(p=>!p.noStock).map(p=>{
+  return state.products.filter(p=>!p.noStock && (p.active!==false || onHand(p.sku,'all',null)!==0)).map(p=>{
     const home=onHand(p.sku,'home',d), trolley=onHand(p.sku,'trolley',d);
     return {p, home, trolley, total:home+trolley, cover:weeksCover(p.sku), low:isLow(p)};
   });
