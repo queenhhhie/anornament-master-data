@@ -357,6 +357,7 @@ let state = {
   packs: [], defaultPack:'',
   costs: {}, wishes: [],
   deleted: {sales:[],moves:[],counts:[],batches:[]},   // so a delete on one device isn't undone by a merge from the other
+  aliases: {},        // shopify line name -> SKU, remembered once you match it by hand
   sale: [], saleMeta:{customer:'',note:'',followUp:false,discPct:0,finalTotal:null}
 };
 let ui = {tab:'sell', q:'', group:'all', showLines:false, range:'day', dash:'money',
@@ -396,7 +397,7 @@ async function kvSet(k,v){
   throw new Error('no storage');
 }
 const KEEP=['products','sales','moves','counts','batches','markets','event','tradeDate',
-            'packs','defaultPack','costs','wishes','sale','saleMeta','deleted'];
+            'packs','defaultPack','costs','wishes','sale','saleMeta','deleted','aliases'];
 const touch = o => { if(o) o.upd=Date.now(); return o; };
 let saveTimer=null;
 function save(){
@@ -426,6 +427,7 @@ async function loadState(){
   ['sales','moves','counts','batches','markets','wishes','sale'].forEach(k=>{ if(!Array.isArray(state[k])) state[k]=[]; });
   if(!state.costs) state.costs={};
   if(!state.deleted) state.deleted={sales:[],moves:[],counts:[],batches:[]};
+  if(!state.aliases) state.aliases={};
   ['sales','moves','counts','batches'].forEach(k=>{ if(!Array.isArray(state.deleted[k])) state.deleted[k]=[]; });
   if(!state.saleMeta) state.saleMeta=blankMeta();
   seedMarkets();
@@ -1262,7 +1264,11 @@ function parseDay(str){
   return null;
 }
 /* find a stock line from whatever the file calls it */
+const aliasKey = (name, variant) => norm(name)+'|'+norm(variant||'');
 function matchSku(sku, name, variant){
+  const al=state.aliases[aliasKey(name,variant)];
+  if(al==='__none__') return null;                        // you told it to leave this one alone
+  if(al){ const p=bySku(al); if(p) return p; }
   if(sku){ const p=state.products.find(p=>norm(p.sku)===norm(sku)); if(p) return p; }
   const n=norm(name), v=norm(variant||'');
   if(!n) return null;
@@ -1272,6 +1278,10 @@ function matchSku(sku, name, variant){
   if(p) return p;
   if(!variant){                                   // "Title - Variant" in one field
     p=state.products.find(p=>norm(fullName(p))===n);
+    if(p) return p;
+  }
+  if(v){    // the website title often carries extra words: "The Quiet Feast - Hand Carved Wooden Figure"
+    p=state.products.find(p=>norm(p.variant)===v && norm(p.name).length>3 && n.startsWith(norm(p.name)));
     if(p) return p;
   }
   return null;
@@ -1792,7 +1802,38 @@ function importCounts(text){
 }
 
 /* ---------------- ONLINE: Shopify orders export ---------------- */
+let lastShopifyText=null;
+function openMapSheet(title, variant, sku0, back){
+  ui.mapq='';
+  const draw=()=>{
+    const q=(ui.mapq||'').toLowerCase();
+    const list=state.products.filter(p=>!p.noStock && p.active!==false &&
+      (!q || (fullName(p)+' '+p.sku+' '+p.group).toLowerCase().includes(q))).sort(byGroupName).slice(0,50);
+    openSheet(`
+      <h3>Which piece is this?</h3>
+      <div class="meta">${esc(title)}${variant?' — '+esc(variant):''}${sku0?' · SKU in file: '+esc(sku0):''}</div>
+      <input class="field" id="mapq" placeholder="Search your lines…" value="${esc(ui.mapq||'')}">
+      <div style="max-height:52vh;overflow:auto;margin-top:8px">
+        ${list.length?list.map(p=>`<button class="opt" data-map="${p.sku}" style="width:100%;margin-bottom:6px">
+          ${esc(fullName(p))}<small>${p.sku} · ${esc(p.group)} · ${money(p.price)}</small></button>`).join('')
+          :'<p class="empty">Nothing matches that search.</p>'}
+      </div>
+      <button class="ghost" id="mapNone">Record the sale but never move stock for this</button>
+      <button class="ghost" id="mapBack">Back</button>`);
+    bindSearch('mapq', v=>{ ui.mapq=v; }, draw);
+    document.querySelectorAll('[data-map]').forEach(b=>b.onclick=()=>{
+      state.aliases[aliasKey(title,variant)]=b.dataset.map;
+      save(); toast(`${title} → ${b.dataset.map}, remembered for next time`); back();
+    });
+    document.getElementById('mapNone').onclick=()=>{
+      state.aliases[aliasKey(title,variant)]='__none__'; save(); back();
+    };
+    document.getElementById('mapBack').onclick=back;
+  };
+  draw();
+}
 function importShopify(text){
+  lastShopifyText=text;
   const rows=toObjects(parseCSV(text));
   if(!rows.length) return toast('That file had no rows');
   const orders=new Map();
@@ -1825,7 +1866,8 @@ function importShopify(text){
     if(/refund|void|cancel/.test(o.status)){ voided.push(o.name); return; }
     const lines=o.lines.map(l=>{
       const p=matchSku(l.sku,l.title,l.variant) || matchSku('',l.raw,'');
-      if(!p) unmatched.push(l.raw);
+      if(!p && state.aliases[aliasKey(l.title,l.variant)]!=='__none__')
+        unmatched.push({raw:l.raw, title:l.title, variant:l.variant, sku:l.sku});
       return {sku:p?p.sku:'', pid:p?p.pid:'', name:p?p.name:l.title, variant:p?p.variant:l.variant,
               cat:p?p.cat:'Wood', group:p?p.group:'Unmatched',
               qty:l.qty, price:round2(l.price-(l.disc/Math.max(1,l.qty))), list:l.price, matched:!!p};
@@ -1842,11 +1884,19 @@ function importShopify(text){
       <div><span>Refunded / void</span><strong class="num">${voided.length}</strong><small>skipped</small></div>
       <div><span>Unmatched lines</span><strong class="num">${unmatched.length}</strong><small>${unmatched.length?'imported, no stock move':'all matched'}</small></div>
     </div>
-    ${unmatched.length?`<div class="warn">These didn't match a stock line, so they'll be recorded as sales but won't move stock:<br>${[...new Set(unmatched)].slice(0,6).map(esc).join('<br>')}</div>`:''}
+    ${unmatched.length?`<div class="lbl">Not matched to a stock line</div>
+      <div class="warn" style="margin-top:0">Tap one to say which piece it is. The app remembers it, so every future import matches on its own.</div>
+      ${[...new Map(unmatched.map(u=>[u.raw,u])).values()].map(u=>`
+        <div class="ln"><div class="t"><b>${esc(u.title)}</b><span>${u.variant?esc(u.variant):'no variant'}</span></div>
+          <button class="opt" data-fix="${esc(u.raw)}" style="padding:8px 12px">Match</button></div>`).join('')}`:''}
     <div style="font-size:12px;color:var(--ink-soft);margin-top:8px">Shipping and tax are left out — this records what the pieces sold for. Online sales come out of home stock.</div>
     <button class="big" id="shGo">Import ${prepared.length} orders</button>
     <button class="ghost" id="shCancel">Cancel</button>`);
   document.getElementById('shCancel').onclick=closeSheet;
+  document.querySelectorAll('[data-fix]').forEach(b=>b.onclick=()=>{
+    const u=unmatched.find(x=>x.raw===b.dataset.fix);
+    openMapSheet(u.title, u.variant, u.sku, ()=>importShopify(lastShopifyText));
+  });
   document.getElementById('shGo').onclick=()=>{
     if(!prepared.length){ closeSheet(); return toast('Nothing new to import'); }
     const batch=addBatch('online','Shopify orders', prepared.length);
@@ -1865,12 +1915,28 @@ function importShopify(text){
     toast(`${prepared.length} online orders imported`);
   };
 }
+function relinkAlias(title, variant){
+  const sku=state.aliases[aliasKey(title,variant)];
+  if(!sku || sku==='__none__') return 0;
+  const p=bySku(sku); if(!p) return 0;
+  let n=0;
+  state.sales.forEach(s=>s.lines.forEach(l=>{
+    if(l.sku) return;
+    if(aliasKey(l.name,l.variant)!==aliasKey(title,variant)) return;
+    l.sku=p.sku; l.pid=p.pid; l.cat=p.cat; l.group=p.group;
+    addMove({day:s.day, sku:p.sku, loc:(s.channel==='Online'?'home':'trolley'), qty:-l.qty,
+             type:'sale', ref:s.id, note:'matched later'});
+    touch(s); n+=l.qty;
+  }));
+  if(n) save();
+  return n;
+}
 function viewOnline(){
   const online=state.sales.filter(s=>s.channel==='Online');
   const t=totalsOf(online);
   const last=online[0];
   const batches=state.batches.filter(b=>b.kind==='online').slice(0,6);
-  const unmatched=online.flatMap(s=>s.lines.filter(l=>!l.sku).map(l=>l.name));
+  const unmatched=online.flatMap(s=>s.lines.filter(l=>!l.sku).map(l=>({name:l.name,variant:l.variant||''})));
   return `
   <div class="panel">
     <h4>Online sales</h4>
@@ -1884,8 +1950,11 @@ function viewOnline(){
     </div>
   </div>
   ${unmatched.length?`<div class="panel"><h4>Lines that never matched</h4>
-    <div style="font-size:13px;color:var(--ink-soft)">These sold online but aren't linked to a stock line, so they haven't moved stock. Add the SKU to your product list and re-import, or fix the name.</div>
-    <table>${[...new Set(unmatched)].slice(0,10).map(n=>`<tr><td>${esc(n)}</td></tr>`).join('')}</table></div>`:''}
+    <div style="font-size:13px;color:var(--ink-soft);margin-bottom:8px">These sold online but aren't linked to a stock line, so they haven't moved stock. Say which piece each one is and the stock is put right — past sales included.</div>
+    ${[...new Map(unmatched.map(u=>[u.name+'|'+u.variant,u])).values()].slice(0,12).map(u=>`
+      <div class="ln"><div class="t"><b>${esc(u.name)}</b><span>${u.variant?esc(u.variant):'no variant'}</span></div>
+        <button class="opt" data-fixon="${esc(u.name)}||${esc(u.variant)}" style="padding:8px 12px">Match</button></div>`).join('')}
+    </div>`:''}
   ${batches.length?`<div class="panel"><h4>Recent imports</h4><table>
     ${batches.map(b=>`<tr><td>${dayLabel(b.day)}<div style="font-size:11.5px;color:var(--ink-soft)">${esc(b.note)}</div></td>
       <td class="n num">${b.n} orders</td>
@@ -1895,6 +1964,14 @@ function viewOnline(){
 }
 function bindOnline(){
   document.getElementById('shopBtn').onclick=()=>pickFile(t=>importShopify(t));
+  document.querySelectorAll('[data-fixon]').forEach(b=>b.onclick=()=>{
+    const [name,variant]=b.dataset.fixon.split('||');
+    openMapSheet(name, variant, '', ()=>{
+      const n=relinkAlias(name,variant);
+      closeSheet(); render();
+      toast(n?`Matched · ${n} piece(s) taken out of home stock`:'Matched — nothing to move');
+    });
+  });
   document.querySelectorAll('[data-undo]').forEach(b=>b.onclick=()=>undoBatch(b.dataset.undo));
   bindRecords();
 }
